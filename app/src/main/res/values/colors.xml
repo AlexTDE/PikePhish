@@ -1,5 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Primary Co<colors -->
+    <color name="primary">#9440D5</color>
+    <color name="primary_dark">#660BAB</color>
+    <color name="primary_light">#A668D5</color>
+    <color name="accent">#41046F</color>
+
+    <!-- Background Co<colors -->
+    <color name="background">#FFFFFF</color>
+    <color name="surface">#F5F5F5</color>
+    <color name="card_background">#FFFFFF</color>
+
+    <!-- Text Co<colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#9E9E9E</color>
+
+    <!-- Status Co<colors -->
+    <color name="safe_green">#4CAF50</color>
+    <color name="warning_yellow">#FFC107</color>
+    <color name="danger_red">#F44336</color>
+
+    <!-- System Co<colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="divider">#E0E0E0</color>
+
+    <!-- Transparent -->
+    <color name="transparent">#00000000</color>
+
+    <!-- Phishing Alert -->
+    <color name="phishing_alert_bg">#FFEBEE</color>
+    <color name="phishing_alert_border">#EF5350</color>
+
+    <!-- Safe Alert -->
+    <color name="safe_alert_bg">#E8F5E9</color>
+    <color name="safe_alert_border">#66BB6A</color>
 </resources>

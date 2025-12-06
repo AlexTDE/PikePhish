@@ -1,3 +1,68 @@
 <resources>
-    <string name="app_name">PikePhish_v2</string>
+    <string name="app_name">PikePhish</string>
+
+    <!-- Main Screen -->
+    <string name="app_description">Защита от фишинговых ссылок</string>
+    <string name="mode_manual">Ручная проверка</string>
+    <string name="mode_background">Фоновый мониторинг</string>
+
+    <!-- Manual Mode -->
+    <string name="manual_title">Проверка ссылки</string>
+    <string name="enter_url_hint">Введите ссылку для проверки</string>
+    <string name="check_button">Проверить</string>
+    <string name="paste_button">Вставить из буфера</string>
+    <string name="clear_button">Очистить</string>
+
+    <!-- Background Mode -->
+    <string name="background_title">Фоновая защита</string>
+    <string name="service_status_enabled">Защита активна</string>
+    <string name="service_status_disabled">Защита отключена</string>
+    <string name="enable_service_button">Включить защиту</string>
+    <string name="disable_service_button">Отключить защиту</string>
+    <string name="service_description">Автоматически проверяет ссылки, которые вы копируете или открываете</string>
+    <string name="open_settings">Перейти в настройки</string>
+
+    <!-- Results -->
+    <string name="result_safe_title">✅ Ссылка безопасна</string>
+    <string name="result_phishing_title">⚠️ ФИШИНГ ОБНАРУЖЕН!</string>
+    <string name="result_error_title">❌ Ошибка проверки</string>
+    <string name="confidence_label">Уверенность: %d%%</string>
+    <string name="domain_label">Домен:</string>
+    <string name="checked_at_label">Проверено:</string>
+
+    <!-- History -->
+    <string name="history_title">История проверок</string>
+    <string name="history_empty">История пуста</string>
+    <string name="clear_history">Очистить историю</string>
+    <string name="history_item_manual">Ручная</string>
+    <string name="history_item_background">Фоновая</string>
+
+    <!-- Menu -->
+    <string name="menu_history">История</string>
+    <string name="menu_settings">Настройки</string>
+    <string name="menu_about">О приложении</string>
+
+    <!-- Errors -->
+    <string name="error_empty_url">Введите ссылку</string>
+    <string name="error_invalid_url">Некорректная ссылка</string>
+    <string name="error_network">Ошибка сети. Проверьте подключение</string>
+    <string name="error_server">Ошибка сервера. Попробуйте позже</string>
+    <string name="error_unknown">Неизвестная ошибка</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_clear_history_title">Очистить историю?</string>
+    <string name="dialog_clear_history_message">Все записи будут удалены</string>
+    <string name="dialog_yes">Да</string>
+    <string name="dialog_no">Нет</string>
+    <string name="dialog_cancel">Отмена</string>
+
+    <!-- Accessibility Service -->
+    <string name="accessibility_service_description">Служба мониторинга ссылок для защиты от фишинга</string>
+    <string name="accessibility_service_summary">PikePhish автоматически проверяет ссылки в реальном времени</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Предупреждения о фишинге</string>
+    <string name="notification_channel_description">Уведомления об обнаруженных фишинговых ссылках</string>
+    <string name="notification_phishing_title">⚠️ Фишинг обнаружен!</string>
+    <string name="notification_phishing_text">Опасная ссылка: %s</string>
 </resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="appBarLayout" type="id" />
+    <item name="toolbar" type="id" />
+    <item name="modeSwitch" type="id" />
+    <item name="urlInputLayout" type="id" />
+    <item name="urlInput" type="id" />
+    <item name="resultCard" type="id" />
+</resources>
