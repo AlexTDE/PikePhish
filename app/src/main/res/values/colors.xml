@@ -1,39 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Co<colors -->
-    <color name="primary">#9440D5</color>
-    <color name="primary_dark">#660BAB</color>
-    <color name="primary_light">#A668D5</color>
-    <color name="accent">#41046F</color>
 
-    <!-- Background Co<colors -->
-    <color name="background">#FFFFFF</color>
-    <color name="surface">#F5F5F5</color>
-    <color name="card_background">#FFFFFF</color>
+    <!-- Primary Lavender Palette -->
+    <color name="primary">#BFA2DB</color>          <!-- Нежная лаванда -->
+    <color name="primary_dark">#9E7CC4</color>     <!-- Более глубокая сирень -->
+    <color name="primary_light">#DCCBEB</color>    <!-- Светлая пастельная сирень -->
+    <color name="accent">#8663B8</color>           <!-- Акцентная сирень, средний контраст -->
 
-    <!-- Text Co<colors -->
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
-    <color name="text_hint">#9E9E9E</color>
+    <!-- Background & Surfaces -->
+    <color name="background">#FAF7FF</color>       <!-- Очень светлый лавандовый фон -->
+    <color name="surface">#F3EDFB</color>          <!-- Мягкая пастельно-лавандовая поверхность -->
+    <color name="card_background">#FFFFFF</color>  <!-- Белый фон карточек для читабельности -->
 
-    <!-- Status Co<colors -->
-    <color name="safe_green">#4CAF50</color>
-    <color name="warning_yellow">#FFC107</color>
-    <color name="danger_red">#F44336</color>
+    <!-- Text Colors -->
+    <color name="text_primary">#2D2A32</color>     <!-- Тёмно-графитовый (мягче, чем чистый чёрный) -->
+    <color name="text_secondary">#6C6475</color>   <!-- Серо-сиреневый вторичный текст -->
+    <color name="text_hint">#AFA7BC</color>        <!-- Нежный сиреневый для подсказок -->
 
-    <!-- System Co<colors -->
+    <!-- Status Colors -->
+    <color name="safe_green">#6ECB63</color>       <!-- Мягкий зелёный (не кричащий) -->
+    <color name="warning_yellow">#F7D67A</color>   <!-- Спокойный жёлтый -->
+    <color name="danger_red">#E57373</color>       <!-- Приглушённый красный -->
+
+    <!-- System Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="divider">#E0E0E0</color>
+    <color name="divider">#E4DAF2</color>          <!-- Сиреневый разделитель -->
 
     <!-- Transparent -->
     <color name="transparent">#00000000</color>
 
     <!-- Phishing Alert -->
-    <color name="phishing_alert_bg">#FFEBEE</color>
-    <color name="phishing_alert_border">#EF5350</color>
+    <color name="phishing_alert_bg">#FFF3F4</color>      <!-- Очень мягкий розовато-красный -->
+    <color name="phishing_alert_border">#E57373</color>
 
     <!-- Safe Alert -->
-    <color name="safe_alert_bg">#E8F5E9</color>
-    <color name="safe_alert_border">#66BB6A</color>
+    <color name="safe_alert_bg">#ECF9EE</color>
+    <color name="safe_alert_border">#6ECB63</color>
+
 </resources>
