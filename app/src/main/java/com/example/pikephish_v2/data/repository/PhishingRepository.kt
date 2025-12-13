@@ -42,9 +42,10 @@ class PhishingRepository(
             if (cachedResult != null) {
                 Log.d(TAG, "💾 Найдено в кэше: $normalizedUrl")
                 val response = PhishingCheckResponse(
+                    url = normalizedUrl,
                     isPhishing = cachedResult.isPhishing,
                     confidence = cachedResult.confidence,
-                    prediction = cachedResult.prediction,
+                    prediction = cachedResult.prediction ?: "unknown",
                     reason = cachedResult.reason ?: "Из кэша"
                 )
                 return Result.success(response)
