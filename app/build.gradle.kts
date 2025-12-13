@@ -113,4 +113,18 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.room.testing)
+
+    // HTTP Client (OkHttp)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+
+    // HTML Parsing (Jsoup)
+    implementation("org.jsoup:jsoup:1.17.2")
+
+    // DNS (dnsjava)
+    implementation("dnsjava:dnsjava:3.5.3")
+
+    // Coroutines (уже есть)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 }

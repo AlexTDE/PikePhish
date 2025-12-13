@@ -3,6 +3,7 @@ package com.example.pikephish_v2.ui.main
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -12,10 +13,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import com.example.pikephish_v2.R
+import com.example.pikephish_v2.data.local.AppDatabase
+import com.example.pikephish_v2.data.remote.PhishingApiService
+import com.example.pikephish_v2.data.remote.PhishingCheckResponse
+import com.example.pikephish_v2.data.repository.PhishingRepository
+import com.example.pikephish_v2.data.scanner.UrlScanner
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +48,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var resultUrl: TextView
     private lateinit var resultMessage: TextView
     private lateinit var progressBar: ProgressBar
+
+    // Repository
+    private val repository by lazy {
+        val database = AppDatabase.getDatabase(applicationContext)
+        PhishingRepository(
+            apiService = PhishingApiService.create(useEmulator = true),
+            urlScanner = UrlScanner(),
+            historyDao = database.linkHistoryDao()  // ← Передаём DAO
+        )
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,44 +155,52 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkLink() {
-        val url = urlInput.text.toString().trim()
-
-        if (url.isEmpty()) {
-            Toast.makeText(this, getString(R.string.error_empty_url), Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        showLoading()
-
-        // Симуляция задержки проверки (2 секунды)
-        resultCard.postDelayed({
-            hideLoading()
-            showDemoResult(url)
-        }, 2000)
-    }
-
-    private fun showDemoResult(url: String) {
-        // Заглушка: проверяем наличие слов "phish" или "fake"
-        val isPhishing = url.contains("phish", ignoreCase = true) ||
-                url.contains("fake", ignoreCase = true)
-
+    private fun showResult(response: PhishingCheckResponse) {
         resultCard.visibility = View.VISIBLE
-        resultUrl.text = url
+        resultUrl.text = response.url
 
-        if (isPhishing) {
-            // Фишинг обнаружен
+        if (response.isPhishing) {
+            // 🚨 ФИШИНГ ОБНАРУЖЕН
             resultIcon.setImageResource(R.drawable.ic_warning_circle)
             resultTitle.text = getString(R.string.result_phishing_title)
             resultTitle.setTextColor(getColor(R.color.danger_red))
-            resultMessage.text = "Эта ссылка опасна! Не переходите по ней."
+
+            val message = buildString {
+                appendLine("Эта ссылка опасна!")
+                appendLine()
+                appendLine("Уверенность: ${(response.confidence * 100).toInt()}%")
+                if (!response.reason.isNullOrEmpty()) {
+                    appendLine()
+                    appendLine("Причина:")
+                    appendLine(response.reason)
+                }
+            }
+            resultMessage.text = message
+
         } else {
-            // Ссылка безопасна
+            // ✅ ССЫЛКА БЕЗОПАСНА
             resultIcon.setImageResource(R.drawable.ic_check_circle)
             resultTitle.text = getString(R.string.result_safe_title)
             resultTitle.setTextColor(getColor(R.color.safe_green))
-            resultMessage.text = "Уверенность: 95%"
+
+            val message = buildString {
+                appendLine("Ссылка проверена и признана безопасной")
+                appendLine()
+                appendLine("Уверенность: ${(response.confidence * 100).toInt()}%")
+            }
+            resultMessage.text = message
         }
+    }
+
+    private fun showError(message: String) {
+        resultCard.visibility = View.VISIBLE
+        resultIcon.setImageResource(R.drawable.ic_warning_circle)
+        resultTitle.text = getString(R.string.result_error_title)
+        resultTitle.setTextColor(getColor(R.color.danger_red))
+        resultUrl.text = ""
+        resultMessage.text = message
+
+        Toast.makeText(this, "Ошибка: $message", Toast.LENGTH_LONG).show()
     }
 
     private fun enableAccessibilityService() {
@@ -200,10 +227,60 @@ class MainActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
         resultCard.visibility = View.GONE
         checkButton.isEnabled = false
+        urlInput.isEnabled = false
     }
 
     private fun hideLoading() {
         progressBar.visibility = View.GONE
         checkButton.isEnabled = true
+        urlInput.isEnabled = true
     }
+
+    private fun checkLink() {
+        val url = urlInput.text.toString().trim()
+
+        if (url.isEmpty()) {
+            Toast.makeText(this, getString(R.string.error_empty_url), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        showLoading()
+
+        // Запускаем проверку через сервер
+        lifecycleScope.launch {
+            val result = repository.checkUrl(url, source = "manual")  // ← source = "manual" для ручной проверки
+
+            hideLoading()
+
+            if (result.isSuccess) {
+                val response = result.getOrNull()!!
+                showResult(response)
+
+                // 📊 ВРЕМЕННЫЙ КОД: Проверяем количество записей в БД
+                try {
+                    val historyItems = repository.getRecentLinks()
+                    historyItems.collect { items ->
+                        val count = items.size
+                        Toast.makeText(
+                            this@MainActivity,
+                            "✅ Сохранено в историю! Всего записей: $count",
+                            Toast.LENGTH_LONG
+                        ).show()
+
+                        // Вывод в лог для отладки
+                        Log.d("MainActivity", "📊 История содержит $count записей:")
+                        items.forEachIndexed { index, item ->
+                            Log.d("MainActivity", "${index + 1}. ${item.url} - ${if (item.isPhishing) "⚠️ Фишинг" else "✅ Безопасно"}")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "❌ Ошибка чтения истории: ${e.message}")
+                }
+
+            } else {
+                showError(result.exceptionOrNull()?.message ?: "Неизвестная ошибка")
+            }
+        }
+    }
+
 }
