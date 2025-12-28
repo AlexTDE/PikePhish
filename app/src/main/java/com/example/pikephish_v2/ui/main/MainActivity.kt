@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.text.TextUtils
 import android.util.Log
 import android.util.Patterns
 import android.view.View
@@ -73,6 +74,14 @@ class MainActivity : AppCompatActivity() {
         setupListeners()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Проверяем статус службы при возврате в приложение
+        if (isBackgroundMode) {
+            updateServiceStatus(isAccessibilityServiceEnabled())
+        }
+    }
+
     private fun initViews() {
         toolbar = findViewById(R.id.toolbar)
         modeSwitch = findViewById(R.id.modeSwitch)
@@ -133,7 +142,7 @@ class MainActivity : AppCompatActivity() {
             manualModeLayout.visibility = View.GONE
             backgroundModeLayout.visibility = View.VISIBLE
 
-            updateServiceStatus(false)
+            updateServiceStatus(isAccessibilityServiceEnabled())
         } else {
             // Manual Mode
             modeTitleText.text = getString(R.string.mode_manual)
@@ -143,6 +152,44 @@ class MainActivity : AppCompatActivity() {
         }
 
         resultCard.visibility = View.GONE
+    }
+
+    /**
+     * Проверка включена ли служба Accessibility
+     */
+    private fun isAccessibilityServiceEnabled(): Boolean {
+        val accessibilityEnabled = Settings.Secure.getInt(
+            contentResolver,
+            Settings.Secure.ACCESSIBILITY_ENABLED,
+            0
+        )
+
+        if (accessibilityEnabled == 1) {
+            val service = "${packageName}/.UrlMonitorService"
+            val enabledServices = Settings.Secure.getString(
+                contentResolver,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            )
+            
+            Log.d("MainActivity", "Enabled services: $enabledServices")
+            Log.d("MainActivity", "Looking for: $service")
+            
+            if (!enabledServices.isNullOrEmpty()) {
+                val colonSplitter = TextUtils.SimpleStringSplitter(':')
+                colonSplitter.setString(enabledServices)
+                
+                while (colonSplitter.hasNext()) {
+                    val componentName = colonSplitter.next()
+                    if (componentName.equals(service, ignoreCase = true)) {
+                        Log.d("MainActivity", "✅ Служба включена!")
+                        return true
+                    }
+                }
+            }
+        }
+        
+        Log.d("MainActivity", "❌ Служба выключена")
+        return false
     }
 
     private fun pasteFromClipboard() {
@@ -231,11 +278,13 @@ class MainActivity : AppCompatActivity() {
         if (isEnabled) {
             serviceStatusIcon.setImageResource(R.drawable.ic_shield_check)
             serviceStatusText.text = getString(R.string.service_status_enabled)
-            enableServiceButton.text = getString(R.string.disable_service_button)
+            enableServiceButton.text = "Отключить защиту"
+            Log.d("MainActivity", "UI обновлен: служба включена")
         } else {
             serviceStatusIcon.setImageResource(R.drawable.ic_shield_off)
             serviceStatusText.text = getString(R.string.service_status_disabled)
             enableServiceButton.text = getString(R.string.enable_service_button)
+            Log.d("MainActivity", "UI обновлен: служба выключена")
         }
     }
 
