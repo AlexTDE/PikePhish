@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.util.Patterns
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -57,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         PhishingRepository(
             apiService = PhishingApiService.create(useEmulator = true),
             urlScanner = UrlScanner(),
-            historyDao = database.linkHistoryDao()  // ← Передаём DAO
+            historyDao = database.linkHistoryDao()
         )
     }
 
@@ -206,13 +207,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun enableAccessibilityService() {
-        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-        startActivity(intent)
-        Toast.makeText(
-            this,
-            "Найдите PikePhish в списке и включите службу",
-            Toast.LENGTH_LONG
-        ).show()
+        try {
+            Log.d("MainActivity", "Открываем настройки специальных возможностей")
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            Toast.makeText(
+                this,
+                "Найдите PikePhish в списке и включите службу",
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Ошибка открытия настроек: ${e.message}")
+            Toast.makeText(
+                this,
+                "Не удалось открыть настройки. Откройте вручную: Настройки → Специальные возможности",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun updateServiceStatus(isEnabled: Boolean) {
@@ -240,19 +252,77 @@ class MainActivity : AppCompatActivity() {
         urlInput.isEnabled = true
     }
 
-    private fun checkLink() {
-        val url = urlInput.text.toString().trim()
+    /**
+     * Валидация и нормализация URL
+     * Принимает: google.com, http://google.com, https://google.com
+     * Возвращает: https://google.com (с протоколом)
+     */
+    private fun normalizeUrl(input: String): String {
+        var url = input.trim()
+        
+        // Если нет протокола - добавляем https://
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://$url"
+        }
+        
+        return url
+    }
 
+    /**
+     * Проверка валидности URL
+     * Должна быть хотя бы одна точка в домене
+     */
+    private fun isValidUrl(input: String): Boolean {
+        val url = input.trim()
+        
+        // Проверка на пустую строку
         if (url.isEmpty()) {
+            return false
+        }
+        
+        // Убираем протокол для проверки домена
+        val urlWithoutProtocol = url
+            .removePrefix("http://")
+            .removePrefix("https://")
+        
+        // Должна быть хотя бы одна точка
+        if (!urlWithoutProtocol.contains(".")) {
+            return false
+        }
+        
+        // Дополнительная проверка через Android Patterns
+        val normalizedUrl = normalizeUrl(url)
+        return Patterns.WEB_URL.matcher(normalizedUrl).matches()
+    }
+
+    private fun checkLink() {
+        val inputUrl = urlInput.text.toString().trim()
+
+        // Проверка на пустую строку
+        if (inputUrl.isEmpty()) {
             Toast.makeText(this, getString(R.string.error_empty_url), Toast.LENGTH_SHORT).show()
             return
         }
+
+        // Валидация URL
+        if (!isValidUrl(inputUrl)) {
+            Toast.makeText(
+                this, 
+                "Некорректная ссылка. Должен быть домен с точкой, например: google.com или https://google.com",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        // Нормализация URL (добавление https:// если нужно)
+        val url = normalizeUrl(inputUrl)
+        Log.d("MainActivity", "Проверяем URL: $url (оригинал: $inputUrl)")
 
         showLoading()
 
         // Запускаем проверку через сервер
         lifecycleScope.launch {
-            val result = repository.checkUrl(url, source = "manual")  // ← source = "manual" для ручной проверки
+            val result = repository.checkUrl(url, source = "manual")
 
             hideLoading()
 
