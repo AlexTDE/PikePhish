@@ -269,8 +269,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Проверка валидности URL
-     * Должна быть хотя бы одна точка в домене
+     * Строгая проверка валидности URL
+     * Проверяет:
+     * 1. Наличие точки в домене
+     * 2. Корректность формата домена (буквы, цифры, дефис)
+     * 3. Наличие валидного TLD (.com, .ru и т.д.)
      */
     private fun isValidUrl(input: String): Boolean {
         val url = input.trim()
@@ -284,9 +287,35 @@ class MainActivity : AppCompatActivity() {
         val urlWithoutProtocol = url
             .removePrefix("http://")
             .removePrefix("https://")
+            .split("/")[0]  // Берем только доменную часть
+            .split("?")[0]   // Убираем query параметры
         
         // Должна быть хотя бы одна точка
         if (!urlWithoutProtocol.contains(".")) {
+            return false
+        }
+        
+        // Проверяем что домен содержит только допустимые символы
+        // Разрешены: буквы, цифры, дефис, точка
+        val domainRegex = Regex("^[a-zA-Z0-9.-]+$")
+        if (!domainRegex.matches(urlWithoutProtocol)) {
+            return false
+        }
+        
+        // Проверяем что есть TLD (домен верхнего уровня) после последней точки
+        val parts = urlWithoutProtocol.split(".")
+        if (parts.size < 2) {
+            return false
+        }
+        
+        val tld = parts.last()
+        // TLD должен содержать только буквы и быть длиной от 2 до 10 символов
+        if (tld.length < 2 || tld.length > 10 || !tld.matches(Regex("^[a-zA-Z]+$"))) {
+            return false
+        }
+        
+        // Проверяем что части домена не пустые
+        if (parts.any { it.isEmpty() }) {
             return false
         }
         
@@ -308,7 +337,7 @@ class MainActivity : AppCompatActivity() {
         if (!isValidUrl(inputUrl)) {
             Toast.makeText(
                 this, 
-                "Некорректная ссылка. Должен быть домен с точкой, например: google.com или https://google.com",
+                "Некорректная ссылка. Введите валидный URL, например: google.com или https://example.com",
                 Toast.LENGTH_LONG
             ).show()
             return
