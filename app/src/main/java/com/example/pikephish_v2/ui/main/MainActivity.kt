@@ -302,19 +302,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Валидация и нормализация URL
-     * Принимает: google.com, http://google.com, https://google.com
-     * Возвращает: https://google.com (с протоколом)
+     * Умная нормализация URL с сохранением явно указанного протокола
+     * 
+     * Логика:
+     * - Если пользователь указал http:// или https:// - оставляем как есть
+     * - Если протокол не указан - добавляем https:// (более безопасно)
+     * 
+     * Примеры:
+     * - "google.com" → "https://google.com"
+     * - "http://example.com" → "http://example.com" (сохраняется HTTP)
+     * - "https://secure.site" → "https://secure.site"
+     * 
+     * Серверная часть при необходимости может попробовать оба протокола
+     * или вернуть ошибку подключения
      */
     private fun normalizeUrl(input: String): String {
-        var url = input.trim()
+        val url = input.trim()
         
-        // Если нет протокола - добавляем https://
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            url = "https://$url"
+        // Если протокол УЖЕ указан явно - сохраняем выбор пользователя
+        if (url.startsWith("http://", ignoreCase = true) || 
+            url.startsWith("https://", ignoreCase = true)) {
+            return url
         }
         
-        return url
+        // Если протокола нет - добавляем HTTPS по умолчанию
+        // (это более безопасно и соответствует современным стандартам)
+        return "https://$url"
     }
 
     /**
@@ -392,7 +405,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Нормализация URL (добавление https:// если нужно)
+        // Нормализация URL (добавление протокола если нужно, с сохранением явно указанного)
         val url = normalizeUrl(inputUrl)
         Log.d("MainActivity", "Проверяем URL: $url (оригинал: $inputUrl)")
 
